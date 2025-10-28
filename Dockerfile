@@ -1,8 +1,45 @@
-FROM nginx:alpine
+FROM node:20-alpine AS base
 
-COPY blog/ /usr/share/nginx/html
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
 
-EXPOSE 80
+# Habilita o Corepack para usar pnpm
+RUN corepack enable
 
-CMD ["nginx", "-g", "daemon off;"]
+# Configura variáveis de ambiente para pnpm
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY . .
+RUN pnpm run build
+
+FROM base AS production
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_SHARP_PATH="/app/node_modules/sharp"
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=deps /app/public ./public
+
+RUN mkdir .next
+RUN chown nextjs:nodejs .next
+
+COPY --from=deps /app/next.config.ts ./
+COPY --from=deps --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=deps --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+USER nextjs
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+CMD ["node", "server.js"]
