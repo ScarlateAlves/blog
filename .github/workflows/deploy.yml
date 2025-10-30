@@ -45,7 +45,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull 107363238411.dkr.ecr.us-east-1.amazonaws.com/blog:latest
+            docker pull ${{ secrets.IMAGE_DOCKER }}
             docker stop site-container || true
             docker rm site-container || true
-            docker run -d --name site-container -p 80:3000 107363238411.dkr.ecr.us-east-1.amazonaws.com/blog:latest
+            docker run -d --name site-container -p 80:3000 ${{ secrets.IMAGE_DOCKER }}
