@@ -68,7 +68,7 @@ export default function Travel() {
           height="500"
         />
         <div className="max-w-4xl flex flex-col justify-between items-center gap-5 text-center">
-          <Heading>Best place to travel to in Spring</Heading>
+          <Heading>Funcionou o sync</Heading>
         </div>
       </div>
       <div className="flex flex-col gap-10 pt-5">
