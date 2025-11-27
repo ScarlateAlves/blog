@@ -1,0 +1,21 @@
+# .github/workflows/push-to-content-flow.yml
+name: Push to content-flow
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    push:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0
+            - name: Update content-flow branch from main
+              run: |
+                  git config --global user.email "github-actions@github.com"
+                  git config --global user.name "GitHub Actions"
+                  git checkout content-flow
+                  git reset --hard origin/main
+                  git push origin content-flow
