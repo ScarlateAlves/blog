@@ -61,7 +61,7 @@ export default function Home() {
           width="1280"
           height="500"
         />
-        <h1>E importe que nao quebre</h1>
+        <h1>E importe que nao quebre (chanc a parte da flow)</h1>
         <div className="max-w-4xl flex flex-col justify-between items-center gap-5 text-center">
           <Heading>Best place to travel to in Spring</Heading>
           <Text>
