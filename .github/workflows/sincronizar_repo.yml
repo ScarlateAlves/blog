@@ -1,5 +1,9 @@
 # .github/workflows/push-to-content-flow.yml
 name: Push to content-flow
+
+permissions:
+    contents: write
+
 on:
     push:
         branches:
