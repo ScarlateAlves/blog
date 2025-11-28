@@ -64,11 +64,12 @@ export default function Home() {
         <div className="max-w-4xl flex flex-col justify-between items-center gap-5 text-center">
           <Heading>Best place to travel to in Spring</Heading>
           <Text>
-            Lorem ipsum dolor sit amet consectetur. Non egestas a quisque odio
-            in. Sed sit lacus in nisi proin eu ut. Quis nunc eget aliquam eros
-            at. Nisl convallis ultricies morbi auctor at etiam. Tellus in at
-            egestas aliquet cras diam. Elementum vivamus cras duis condimentum
-            arcu convallis netus eu commodo. Non pellentesque feugiat id.
+            coisa Lorem ipsum dolor sit amet consectetur. Non egestas a quisque
+            odio in. Sed sit lacus in nisi proin eu ut. Quis nunc eget aliquam
+            eros at. Nisl convallis ultricies morbi auctor at etiam. Tellus in
+            at egestas aliquet cras diam. Elementum vivamus cras duis
+            condimentum arcu convallis netus eu commodo. Non pellentesque
+            feugiat id.
           </Text>
           <Button>Read more</Button>
         </div>
