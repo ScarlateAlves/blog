@@ -17,4 +17,4 @@ jobs:
             source: main
             target: content-flow
         secrets:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            G_TOKEN: ${{ secrets.GITHUB_TOKEN }}
