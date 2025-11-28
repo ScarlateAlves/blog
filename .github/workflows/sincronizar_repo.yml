@@ -12,10 +12,7 @@ on:
 
 jobs:
     branch-sync:
-        if: github.event.pull_request.head.repo.full_name == github.repository
         uses: ScarlateAlves/store/.github/workflows/update-content.yml@main
         with:
             source: main
             target: content-flow
-        secrets:
-            G_TOKEN: ${{ secrets.GITHUB_TOKEN }}
