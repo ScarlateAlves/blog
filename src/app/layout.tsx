@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`antialiased`}>
         <Header />
-        <main className="max-w-7xl m-auto">{children}</main>f
+        <main className="max-w-7xl m-auto">{children}</main>fh
         <Footer />
       </body>
     </html>
