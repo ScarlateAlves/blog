@@ -3,6 +3,7 @@ name: Sync main to content-flow
 
 permissions:
     contents: write
+    pull-requests: write
 
 on:
     push:
