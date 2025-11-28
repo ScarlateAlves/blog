@@ -13,6 +13,5 @@ jobs:
     branch-sync:
         uses: ScarlateAlves/store/.github/workflows/update-content.yml@main
         with:
-            source-branch: main
-            target-repo: user/content-flow
-            target-branch: main
+            source: main
+            target: content-flow
