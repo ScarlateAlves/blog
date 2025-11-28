@@ -53,7 +53,7 @@ const card: CardInformationProps[] = [
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center bg-red-500">
       <div className="flex flex-col gap-5 items-center mx-5 py-5 lg:p-10">
         <Image
           src="/image1.png"
