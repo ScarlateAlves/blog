@@ -67,7 +67,7 @@ export default function Home() {
             coisa Lorem ipsum dolor sit amet consectetur. Non egestas a quisque
             odio in. Sed sit lacus in nisi proin eu ut. Quis nunc eget aliquam
             eros at. Nisl convallis ultricies morbi auctor at etiam. Tellus in
-            at egestas aliquet cras diam. Elementum vivamus cras duis
+            at egestas aliquet cras diam. Elementum vivamus cras duisf
             condimentum arcu convallis netus eu commodo. Non pellentesque
             feugiat id.
           </Text>
