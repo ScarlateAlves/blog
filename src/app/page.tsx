@@ -61,15 +61,15 @@ export default function Home() {
           width="1280"
           height="500"
         />
-        <div className="max-w-4xl flex flex-col justify-between items-center gap-6 text-center bg-purple-400">
-          <Heading>Eu eita teste teste mudou aqui</Heading>
+        <div className="max-w-4xl flex flex-col justify-between items-center gap-3 text-center bg-purple-400">
+          <Heading>Eu eita teste teste ff</Heading>
           <Text>
             coisa Lorem ipsum dolor sit amet consectetur. Non egestas a quisque
             odio in. Sed sit lacus in nisi proin eu ut. Quis nunc eget aliquam
             eros at. Nisl convallis ultricies morbi auctor at etiam. Tellus in
-            at egestas aliquet cras diam. Elementum vivamus cras duis
-            condimentum arcu convallis netus eu commodo. Non pellentesque
-            feugiat id.
+            at egestas aliquet cras diam. Elementum vivamus cras duisf
+            condimentum arcu convallis netus eu commodo. Non
+            pellentesquehuhhuihg feugiat id.
           </Text>
           <Button>Read more</Button>
         </div>
