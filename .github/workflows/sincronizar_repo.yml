@@ -11,21 +11,8 @@ on:
 
 jobs:
     branch-sync:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
-            - name: Update content-flow branch from main
-              run: |
-                  git config --global user.email "github-actions@github.com"
-                  git config --global user.name "GitHub Actions"
-
-            - name: Sync branches
-              if: github.ref == 'refs/heads/main'
-              run: |
-                  git fetch origin
-                  git checkout content-flow
-                  git merge main
-                  git push origin content-flow
+        uses: ScarlateAlves/store/.github/workflows/sync-branch.yml
+        with:
+            source-branch: main
+            target-repo: user/content-flow
+            target-branch: main
