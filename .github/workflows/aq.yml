@@ -31,6 +31,9 @@ jobs:
           echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
           echo "pr_description=$DESCRIPTION" >> $GITHUB_OUTPUT
           echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
+          echo "PR_BODY<<EOF" >> $GITHUB_ENV
+          echo "${{ github.event.pull_request.body }}" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: Get commit list
         id: commits
@@ -58,15 +61,11 @@ jobs:
               },
               {
                 \"type\": \"section\",
-                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Título:* ${{ steps.prinfo.outputs.pr_title }}\"}
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Título:* ${{ github.event.pull_request.body }}\"}
               },
               {
                 \"type\": \"section\",
                 \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Descrição:* ${{ steps.prinfo.outputs.pr_description }}\"}
-              },
-              {
-                \"type\": \"section\",
-                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Commits inclusos:* \n${{ steps.commits.outputs.commits }}\"}
               },
               {
                 \"type\": \"actions\",
