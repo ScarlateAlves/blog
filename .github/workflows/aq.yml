@@ -6,37 +6,68 @@ on:
       - main
 
 jobs:
-  notify:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Enviar notificação para Slack
-        run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_NUMBER="${{ github.event.pull_request.number }}"
-          PR_AUTHOR="${{ github.event.pull_request.user.login }}"
-          PR_BODY="${{ github.event.pull_request.body }}"
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-          PAYLOAD=$(jq -n \
-            --arg title "$PR_TITLE" \
-            --arg number "$PR_NUMBER" \
-            --arg author "$PR_AUTHOR" \
-            --arg body "$PR_BODY" \
-            '{
-                text: "*PR #" + $number + " merged!*",
-                attachments: [
+      # Busca o PR que gerou esse push
+      - name: Get PR info
+        id: prinfo
+        uses: actions-ecosystem/action-get-merged-pull-request@v1
+
+      - name: Extract PR info
+        id: extract
+        run: |
+          echo "pr_number=${{ steps.prinfo.outputs.number }}" >> $GITHUB_OUTPUT
+          echo "pr_title=${{ steps.prinfo.outputs.title }}" >> $GITHUB_OUTPUT
+          echo "pr_body=${{ steps.prinfo.outputs.body }}" >> $GITHUB_OUTPUT
+          echo "author_name=${{ steps.prinfo.outputs.author }}" >> $GITHUB_OUTPUT
+
+      - name: Get commit list
+        id: commits
+        run: |
+          COMMITS=$(git log -n 5 --pretty=format:"• %s")
+          echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack
+        run: |
+          curl -X POST -H "Content-type: application/json" \
+          --data "{
+            \"blocks\": [
+              {
+                \"type\": \"header\",
+                \"text\": {\"type\": \"plain_text\", \"text\": \"📦 Novo Pacote Publicado\"}
+              },
+              {
+                \"type\": \"section\",
+                \"fields\": [
+                  {\"type\": \"mrkdwn\", \"text\": \"*Título do PR:* ${{ steps.extract.outputs.pr_title }}\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Autor:* ${{ steps.extract.outputs.author_name }}\"}
+                ]
+              },
+              {
+                \"type\": \"section\",
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Descrição:* ${{ steps.extract.outputs.pr_body }}\"}
+              },
+              {
+                \"type\": \"section\",
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Commits:* \n${{ steps.commits.outputs.commits }}\"}
+              },
+              {
+                \"type\": \"actions\",
+                \"elements\": [
                   {
-                    color: "#36a64f",
-                    fields: [
-                      { title: "Title", value: $title, short: false },
-                      { title: "Author", value: $author, short: true },
-                      { title: "Description", value: $body, short: false }
-                    ]
+                    \"type\": \"button\",
+                    \"text\": {\"type\": \"plain_text\", \"text\": \"Ver PR no GitHub\"},
+                    \"url\": \"https://github.com/${{ github.repository }}/pull/${{ steps.extract.outputs.pr_number }}\"
                   }
                 ]
-              }')
-
-          curl -X POST \
-            -H 'Content-type: application/json' \
-            --data "$PAYLOAD" \
-            ${{ secrets.SLACK_WEBHOOK_URL }}
+              }
+            ]
+          }" \
+          ${{ secrets.SLACK_WEBHOOK_URL }}
