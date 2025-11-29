@@ -10,28 +10,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # Busca o PR que gerou esse push
-      - name: Get PR info
-        id: prinfo
-        uses: actions-ecosystem/action-get-merged-pull-request@v1
-
       - name: Extract PR info
-        id: extract
+        id: prinfo
         run: |
-          echo "pr_number=${{ steps.prinfo.outputs.number }}" >> $GITHUB_OUTPUT
-          echo "pr_title=${{ steps.prinfo.outputs.title }}" >> $GITHUB_OUTPUT
-          echo "pr_body=${{ steps.prinfo.outputs.body }}" >> $GITHUB_OUTPUT
-          echo "author_name=${{ steps.prinfo.outputs.author }}" >> $GITHUB_OUTPUT
+          PR_MESSAGE="${{ github.event.head_commit.message }}"
+
+          # número do PR
+          PR_NUMBER=$(echo "$PR_MESSAGE" | grep -oE 'pull request #[0-9]+' | grep -oE '[0-9]+')
+
+          # título está na segunda linha
+          TITLE=$(echo "$PR_MESSAGE" | sed -n '2p')
+
+          # descrição é o resto
+          DESCRIPTION=$(echo "$PR_MESSAGE" | tail -n +3)
+
+          # autor
+          AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
+          AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
+
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
+          echo "pr_description=$DESCRIPTION" >> $GITHUB_OUTPUT
+          echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
 
       - name: Get commit list
         id: commits
         run: |
-          COMMITS=$(git log -n 5 --pretty=format:"• %s")
+          MERGE_SHA=${{ github.sha }}
+          COMMITS=$(git log ${MERGE_SHA}^1..${MERGE_SHA}^2 --oneline | sed 's/"/'\''/g')
           echo "commits=$COMMITS" >> $GITHUB_OUTPUT
 
       - name: Notify Slack
@@ -41,30 +47,41 @@ jobs:
             \"blocks\": [
               {
                 \"type\": \"header\",
-                \"text\": {\"type\": \"plain_text\", \"text\": \"📦 Novo Pacote Publicado\"}
+                \"text\": {\"type\": \"plain_text\", \"text\": \"📦 Pacote Publicado\"}
               },
               {
                 \"type\": \"section\",
                 \"fields\": [
-                  {\"type\": \"mrkdwn\", \"text\": \"*Título do PR:* ${{ steps.extract.outputs.pr_title }}\"},
-                  {\"type\": \"mrkdwn\", \"text\": \"*Autor:* ${{ steps.extract.outputs.author_name }}\"}
+                  {\"type\": \"mrkdwn\", \"text\": \"*Pacote:* ${{ steps.info.outputs.package }}\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Versão:* ${{ steps.info.outputs.version }}\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*PR:* #${{ steps.prinfo.outputs.pr_number }}\"},
+                  {\"type\": \"mrkdwn\", \"text\": \"*Autor:* ${{ steps.prinfo.outputs.author_name }}\"}
                 ]
               },
               {
                 \"type\": \"section\",
-                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Descrição:* ${{ steps.extract.outputs.pr_body }}\"}
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Título:* ${{ steps.prinfo.outputs.pr_title }}\"}
               },
               {
                 \"type\": \"section\",
-                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Commits:* \n${{ steps.commits.outputs.commits }}\"}
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Descrição:* ${{ steps.prinfo.outputs.pr_description }}\"}
+              },
+              {
+                \"type\": \"section\",
+                \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Commits inclusos:* \n${{ steps.commits.outputs.commits }}\"}
               },
               {
                 \"type\": \"actions\",
                 \"elements\": [
                   {
                     \"type\": \"button\",
-                    \"text\": {\"type\": \"plain_text\", \"text\": \"Ver PR no GitHub\"},
-                    \"url\": \"https://github.com/${{ github.repository }}/pull/${{ steps.extract.outputs.pr_number }}\"
+                    \"text\": {\"type\": \"plain_text\", \"text\": \"Ver PR\"},
+                    \"url\": \"https://github.com/${{ github.repository }}/pull/${{ steps.prinfo.outputs.pr_number }}\"
+                  },
+                  {
+                    \"type\": \"button\",
+                    \"text\": {\"type\": \"plain_text\", \"text\": \"NPM\"},
+                    \"url\": \"https://www.npmjs.com/package/${{ steps.info.outputs.package }}\"
                   }
                 ]
               }
