@@ -10,14 +10,6 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Read package info
-              id: info
-              run: |
-                  PACKAGE=$(jq -r .name package.json)
-                  VERSION=$(jq -r .version package.json)
-                  echo "package=$PACKAGE" >> $GITHUB_OUTPUT
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
-
             - name: Extract PR info
               id: prinfo
               run: |
