@@ -13,5 +13,11 @@ jobs:
             - name: Notify Slack
               run: |
                   curl -X POST -H 'Content-type: application/json' \
-                    --data '{"text":"⚡ Teste: o workflow está funcionando!"}' \
+                    --data "{
+                        \"text\": \"📦 *Pacote publicado!*\n
+                        *Pacote:* ${{ steps.info.outputs.package }}\n
+                        *Versão:* ${{ steps.info.outputs.version }}\n
+                        *Descrição do PR:* ${{ steps.prmsg.outputs.description }}\n
+                        *Última alteração:* ${{ steps.changes.outputs.changes }}\"
+                    }" \
                     ${{ secrets.SLACK_WEBHOOK_URL }}
