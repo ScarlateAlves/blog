@@ -1,0 +1,38 @@
+name: Release Publish
+
+on:
+    push:
+        branches:
+            - main
+
+jobs:
+    publish:
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup Node
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Install dependencies
+              run: yarn install
+
+            - name: Read version
+              id: version
+              run: |
+                  VERSION=$(jq -r .version package.json)
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            - name: Publish package
+              run: |
+                  yarn build
+                  yarn publish --access public
+
+            - name: Notify Slack
+              run: |
+                  curl -X POST -H 'Content-type: application/json' --data '{"text":"Olá, Mundo!"}' 
+                  ${{ secrets.SLACK_WEBHOOK_URL }}
