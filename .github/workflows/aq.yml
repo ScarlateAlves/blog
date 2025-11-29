@@ -28,7 +28,6 @@ jobs:
           AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
           AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
 
-          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
           echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
           echo "pr_description=$DESCRIPTION" >> $GITHUB_OUTPUT
           echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
@@ -54,7 +53,6 @@ jobs:
                 \"fields\": [
                   {\"type\": \"mrkdwn\", \"text\": \"*Pacote:* ${{ steps.info.outputs.package }}\"},
                   {\"type\": \"mrkdwn\", \"text\": \"*Versão:* ${{ steps.info.outputs.version }}\"},
-                  {\"type\": \"mrkdwn\", \"text\": \"*PR:* #${{ steps.prinfo.outputs.pr_number }}\"},
                   {\"type\": \"mrkdwn\", \"text\": \"*Autor:* ${{ steps.prinfo.outputs.author_name }}\"}
                 ]
               },
