@@ -1,4 +1,4 @@
-name: Test Slack
+name: Release Publish
 
 on:
     push:
@@ -6,18 +6,93 @@ on:
             - main
 
 jobs:
-    notify:
+    publish:
         runs-on: ubuntu-latest
 
         steps:
+            - name: Read package info
+              id: info
+              run: |
+                  PACKAGE=$(jq -r .name package.json)
+                  VERSION=$(jq -r .version package.json)
+                  echo "package=$PACKAGE" >> $GITHUB_OUTPUT
+                  echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+            - name: Extract PR info
+              id: prinfo
+              run: |
+                  PR_MESSAGE="${{ github.event.head_commit.message }}"
+
+                  # número do PR
+                  PR_NUMBER=$(echo "$PR_MESSAGE" | grep -oE 'pull request #[0-9]+' | grep -oE '[0-9]+')
+
+                  # título está na segunda linha
+                  TITLE=$(echo "$PR_MESSAGE" | sed -n '2p')
+
+                  # descrição é o resto
+                  DESCRIPTION=$(echo "$PR_MESSAGE" | tail -n +3)
+
+                  # autor
+                  AUTHOR_NAME="${{ github.event.head_commit.author.name }}"
+                  AUTHOR_EMAIL="${{ github.event.head_commit.author.email }}"
+
+                  echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+                  echo "pr_title=$TITLE" >> $GITHUB_OUTPUT
+                  echo "pr_description=$DESCRIPTION" >> $GITHUB_OUTPUT
+                  echo "author_name=$AUTHOR_NAME" >> $GITHUB_OUTPUT
+
+            - name: Get commit list
+              id: commits
+              run: |
+                  MERGE_SHA=${{ github.sha }}
+                  COMMITS=$(git log ${MERGE_SHA}^1..${MERGE_SHA}^2 --oneline | sed 's/"/'\''/g')
+                  echo "commits=$COMMITS" >> $GITHUB_OUTPUT
+
             - name: Notify Slack
               run: |
-                  curl -X POST -H 'Content-type: application/json' \
-                    --data "{
-                        \"text\": \"📦 *Pacote publicado!*\n
-                        *Pacote:* ${{ steps.info.outputs.package }}\n
-                        *Versão:* ${{ steps.info.outputs.version }}\n
-                        *Descrição do PR:* ${{ steps.prmsg.outputs.description }}\n
-                        *Última alteração:* ${{ steps.changes.outputs.changes }}\"
-                    }" \
-                    ${{ secrets.SLACK_WEBHOOK_URL }}
+                  curl -X POST -H "Content-type: application/json" \
+                  --data "{
+                    \"blocks\": [
+                      {
+                        \"type\": \"header\",
+                        \"text\": {\"type\": \"plain_text\", \"text\": \"📦 Pacote Publicado\"}
+                      },
+                      {
+                        \"type\": \"section\",
+                        \"fields\": [
+                          {\"type\": \"mrkdwn\", \"text\": \"*Pacote:* ${{ steps.info.outputs.package }}\"},
+                          {\"type\": \"mrkdwn\", \"text\": \"*Versão:* ${{ steps.info.outputs.version }}\"},
+                          {\"type\": \"mrkdwn\", \"text\": \"*PR:* #${{ steps.prinfo.outputs.pr_number }}\"},
+                          {\"type\": \"mrkdwn\", \"text\": \"*Autor:* ${{ steps.prinfo.outputs.author_name }}\"}
+                        ]
+                      },
+                      {
+                        \"type\": \"section\",
+                        \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Título:* ${{ steps.prinfo.outputs.pr_title }}\"}
+                      },
+                      {
+                        \"type\": \"section\",
+                        \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Descrição:* ${{ steps.prinfo.outputs.pr_description }}\"}
+                      },
+                      {
+                        \"type\": \"section\",
+                        \"text\": {\"type\": \"mrkdwn\", \"text\": \"*Commits inclusos:* \n${{ steps.commits.outputs.commits }}\"}
+                      },
+                      {
+                        \"type\": \"actions\",
+                        \"elements\": [
+                          {
+                            \"type\": \"button\",
+                            \"text\": {\"type\": \"plain_text\", \"text\": \"Ver PR\"},
+                            \"url\": \"https://github.com/${{ github.repository }}/pull/${{ steps.prinfo.outputs.pr_number }}\"
+                          },
+                          {
+                            \"type\": \"button\",
+                            \"text\": {\"type\": \"plain_text\", \"text\": \"NPM\"},
+                            \"url\": \"https://www.npmjs.com/package/${{ steps.info.outputs.package }}\"
+                          }
+                        ]
+                      }
+                    ]
+                  }" \
+                  ${{ secrets.SLACK_WEBHOOK_URL }}
